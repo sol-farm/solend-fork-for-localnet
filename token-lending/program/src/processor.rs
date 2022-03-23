@@ -2290,15 +2290,6 @@ fn get_pyth_price(pyth_price_info: &AccountInfo, clock: &Clock) -> Result<Decima
         return Err(LendingError::InvalidOracleConfig.into());
     }
 
-    let slots_elapsed = clock
-        .slot
-        .checked_sub(pyth_price.valid_slot)
-        .ok_or(LendingError::MathOverflow)?;
-    if slots_elapsed >= STALE_AFTER_SLOTS_ELAPSED {
-        msg!("Pyth oracle price is stale");
-        return Err(LendingError::InvalidOracleConfig.into());
-    }
-
     let price: u64 = pyth_price.agg.price.try_into().map_err(|_| {
         msg!("Oracle price cannot be negative");
         LendingError::InvalidOracleConfig
@@ -2368,14 +2359,6 @@ fn get_switchboard_price(
     // }
     let round_result: RoundResult = get_aggregator_result(&aggregator)?;
 
-    let slots_elapsed = clock
-        .slot
-        .checked_sub(round_result.round_open_slot.unwrap())
-        .ok_or(LendingError::MathOverflow)?;
-    if slots_elapsed >= STALE_AFTER_SLOTS_ELAPSED {
-        msg!("Switchboard oracle price is stale");
-        return Err(LendingError::InvalidOracleConfig.into());
-    }
 
     let price_float = round_result.result.unwrap_or(0.0);
 
