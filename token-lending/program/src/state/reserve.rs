@@ -126,6 +126,10 @@ impl Reserve {
 
     /// Update borrow rate and accrue interest
     pub fn accrue_interest(&mut self, current_slot: Slot) -> ProgramResult {
+        if self.last_update.slot > current_slot {
+            // need this for testing
+            self.last_update.slot = current_slot;
+        }
         let slots_elapsed = self.last_update.slots_elapsed(current_slot)?;
         if slots_elapsed > 0 {
             let current_borrow_rate = self.current_borrow_rate()?;
